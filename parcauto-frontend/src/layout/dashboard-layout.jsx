@@ -218,11 +218,11 @@ const MENUS = [
     url: "/app/maintenance",
     icon:<DirectionsCarRoundedIcon></DirectionsCarRoundedIcon>
   },
-  // {
-  //   label: " Fiche Vehicule",
-  //   url: "/app/ficheVehicule",
-  //   icon:<DirectionsCarRoundedIcon></DirectionsCarRoundedIcon>
-  // },
+  {
+    label: " Fiche Vehicule",
+    url: "/app/ficheVehicule",
+    icon:<DirectionsCarRoundedIcon></DirectionsCarRoundedIcon>
+  },
   {
     label: " Recharge Carburant",
     url: "/app/carburant",

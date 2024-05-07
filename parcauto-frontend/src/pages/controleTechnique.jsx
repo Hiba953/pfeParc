@@ -208,14 +208,16 @@ import {
   Autocomplete,
 } from "@mui/material";
 import SignatureCanvas from "react-signature-canvas";
+import { useNavigate, useParams } from "react-router-dom";
+
 import { AuthContext } from "../context/authContext";
 import { Assurance } from "./assurance";
 import { ChaineDistribution } from "./chaineDistribution";
-import { useParams } from "react-router-dom";
 import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from 'dayjs';
 // relie a la facon quon va faie routing
 const EXPIRY_TYPE = {
   assurance: "ASSURANCE",
@@ -230,14 +232,15 @@ const EXPIRY_TITLE = {
   gpl: "controle gpl",
 };
 export function ControleTechnique() {
-    const[entrydate,setEntrydate]=useState('')
-    const[expirydate,setExpirydate]=useState('')
+    const[entrydate,setEntrydate]=useState(null)
+    const[expirydate,setExpirydate]=useState(null)
 
   const [ref, setRef] = useState("");
   const[km,setKm]= useState("");
   const[expiryKm,setExpiryKm]= useState("")
   const[montant,setMontant]= useState("")
   const { type } = useParams();
+  const navigate = useNavigate();
   const title = EXPIRY_TITLE[type];
   const authContext = useContext(AuthContext);
   const [vehicules, setVehicules] = useState([]);
@@ -263,6 +266,7 @@ export function ControleTechnique() {
         const data = await response.json();
         setVehicules(data);
         setSelectedVehicule(data[0].matricule);
+        setVehicule(data[0]);
       } catch (err) {
         console.log(err);
       }
@@ -298,19 +302,18 @@ export function ControleTechnique() {
           expiryDate: expirydate,
           expiryKm: expiryKm,
           montant: montant,
-          // type: EXPIRY_TYPE.controleTechnique, 
+          type:EXPIRY_TYPE[type], 
         }),
       });
       const data = await res.json();
       if (res.ok) {
         alert("added successfully");
         console.log(data);
+          navigate("/app/ficheVehicule/"+vehicule._id)
       } else {
         alert(`failed to fill the form: ${data.message}`);      }
     
   }
-
-  
 
   return (
     <Paper style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
@@ -357,10 +360,9 @@ export function ControleTechnique() {
           <DemoContainer components={["DatePicker"]}>
             <DatePicker sx={{ width: "100%" }}
              label=" date dentree"
-            //  value={entrydate}
-            //  onChange={(date) => setEntrydate(date)}
-            //  value={entrydate}
-            //  onChange={(e) => setEntrydate(e.target.value)}
+
+             value={entrydate}
+             onChange={(e) => setEntrydate(e)}
               />
           </DemoContainer>
         </LocalizationProvider>
@@ -379,10 +381,9 @@ export function ControleTechnique() {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DemoContainer components={["DatePicker"]}>
             <DatePicker 
-            //  value={expirydate}
-            //  onChange={(date) => setEntrydate(date)}
-            //  value={expirydate}
-            //  onChange={(e) => setExpirydate(e.target.value)} 
+         
+             value={expirydate}
+             onChange={(e) => setExpirydate (e)} 
              sx={{ width: "100%" }} label=" expiry date" />
           </DemoContainer>
         </LocalizationProvider>

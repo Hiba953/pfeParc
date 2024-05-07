@@ -238,7 +238,7 @@ if(type!==EXPIRY_TYPE.CHAINE_DISTRIBUTION && (!expiryDate)){
 }
 
 catch(e){
-  console.error("Error fetching vehicles:", error);
+  console.error("Error fetching vehicles:",e);
   res.status(500).json({ message: "Server error." });
 }
 

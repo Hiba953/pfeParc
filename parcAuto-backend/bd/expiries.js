@@ -35,5 +35,8 @@ const expiriesSchema = new mongoose.Schema({
     }
 
 });
+// redendonce
+ expiriesSchema.index({ ref: 1, type: 1 }, { unique: true })
+
 
 export const ExpiriesModel = mongoose.model("expiries", expiriesSchema);
