@@ -2,11 +2,13 @@
 import { userModel } from "../bd/model.js";
 import { sessionModel } from "../bd/session.js";
 import crypto from "crypto";
-import { ROLES, SESSION_EXPIRY,EXPIRY_TYPE } from "../constants.js";
+import { ROLES, SESSION_EXPIRY,EXPIRY_TYPE, CARB_TYPE } from "../constants.js";
 import { deserializeUser, requireUser } from "../middlewares/auth.js";
 import { vehiculeModel } from "../bd/vehicule.js";
 import { ExpiriesModel } from "../bd/expiries.js";
 import { gplModel } from "../bd/gpl.js";
+import { RechargeCarburantModel } from "../bd/rechargeCarburant.js";
+
 export function setUpRoutes(app) {
   app.get("/parcAuto", (req, res) => {
     res.json({
@@ -137,7 +139,7 @@ app.put("/users/:id", deserializeUser, requireUser, async(req,res)=>{
 
 app.delete("/users/:id", deserializeUser, requireUser, async (req, res) => {
   try {
-    // Check if the logged-in user has admin role
+    // Check endo admin role
     if (res.locals.user.role !== ROLES.ADMIN) {
       return res.status(403).json({
         message: "Unauthorized access. Admin role required.",
@@ -259,6 +261,103 @@ app.get("/expiries/:id", deserializeUser, requireUser, async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 });
+
+app.post("/rechargeCarburant", deserializeUser, requireUser, async (req, res) => {
+  try {
+    const { chauffeur, vehicule, type, dateRecharge, km, montant } = req.body;
+    const dbVehicule = await vehiculeModel.findById(vehicule);
+
+    if (!chauffeur) {
+      return res.status(404).json({ message: "chauffeur not found." });
+    }
+    if (!vehicule) {
+      return res.status(404).json({ message: "vehicule not found." });
+    }
+    if (!Object.values(CARB_TYPE).includes(type)) {
+      return res.status(400).json({ message: "invalid type." });
+    }
+    if (!dateRecharge) {
+      return res.status(404).json({ message: "dateRecharge not found." });
+    }
+    if (!km) {
+      return res.status(404).json({ message: "km not found." });
+    }
+    if (!montant) {
+      return res.status(404).json({ message: "montant not found." });
+    }
+    const updatedVehicle = await vehiculeModel.findOneAndUpdate(
+      { _id: vehicule },
+      { $set: { km: km } },
+      { new: true }
+    );
+
+    const recharge = await RechargeCarburantModel.create({
+      chauffeur,
+      vehicule,
+      type,
+      dateRecharge,
+      km,
+      montant
+    });
+    // dbVehicule.km = km 
+    res.status(200).json({ recharge, message: "rechargeCarb collection created successfuly" });
+    } catch (e) {
+    console.log(e,'Error fetching recharge:');
+    res.status(500).json({ message: 'Failed create recharge ' });
+  }
+});
+
+
+app.post("/reparationGarage", deserializeUser, requireUser, async (req, res) => {
+    try {
+      const {vehicule,piece,entryDate,exitDate,panneDeclaree,panneReparee,montant,repairDate,} = req.body;
+
+      // Check if the vehicule exists
+      const dbVehicule = await vehiculeModel.findById(vehicule);
+      if (!dbVehicule) {
+        return res.status(404).json({ message: "Vehicule not found." });
+      }
+      if (!piece) {
+        return res.status(404).json({ message: "piece not found." });
+      }
+      if (!entryDate) {
+        return res.status(404).json({ message: "entryDate not found." });
+      }
+      if (!exitDate) {
+        return res.status(404).json({ message: "exitDate not found." });
+      }
+      if (!panneDeclaree) {
+        return res.status(404).json({ message: "panneDeclaree not found." });
+      }
+      if (!panneReparee) {
+        return res.status(404).json({ message: "panneReparee not found." });
+      }
+      if (!montant) {
+        return res.status(404).json({ message: "montant not found." });
+      }
+      if (!repairDate) {
+        return res.status(404).json({ message: "repairDate not found." });
+      }
+
+      // Create new reparation garage entry
+      const reparation = await ReparationGarageModel.create({
+        vehicule,
+        piece,
+        entryDate,
+        exitDate,
+        panneDeclaree,
+        panneReparee,
+        montant,
+        repairDate,
+      });
+
+      res.status(201).json({ reparation, message: "Reparation collection created successfully." });
+    } catch (e) {
+      console.e(e,"Error creating reparation collection:");
+      res.status(500).json({ message: "Server error." });
+    }
+  });
+
 
 
 

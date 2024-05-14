@@ -22,8 +22,6 @@ export const EXPIRY_TYPE = {
     GPL: "GPL",
 }
 
-// export const PIECE={
-//     MOTEUR,PLAQUETTEFREIN
-// } 
+
 
 

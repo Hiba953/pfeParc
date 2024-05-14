@@ -35,7 +35,7 @@ const expiriesSchema = new mongoose.Schema({
     }
 
 });
-// redendonce
+// exclude redendonce de ref
  expiriesSchema.index({ ref: 1, type: 1 }, { unique: true })
 
 
