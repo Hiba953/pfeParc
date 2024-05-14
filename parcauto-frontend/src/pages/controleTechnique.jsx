@@ -207,9 +207,7 @@ import {
   Box,
   Autocomplete,
 } from "@mui/material";
-import SignatureCanvas from "react-signature-canvas";
 import { useNavigate, useParams } from "react-router-dom";
-
 import { AuthContext } from "../context/authContext";
 import { Assurance } from "./assurance";
 import { ChaineDistribution } from "./chaineDistribution";
@@ -267,8 +265,8 @@ export function ControleTechnique() {
         setVehicules(data);
         setSelectedVehicule(data[0].matricule);
         setVehicule(data[0]);
-      } catch (err) {
-        console.log(err);
+      } catch (e) {
+        console.log(e);
       }
     }
     fetchVehicules();
