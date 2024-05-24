@@ -6,7 +6,7 @@ const reparationGarageSchema = new mongoose.Schema({
         ref: "vehicules",
     },
     pieces: {
-        type: [Object],
+        type: String,
     },
   
     entryDate: {

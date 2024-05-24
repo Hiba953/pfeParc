@@ -5,7 +5,7 @@ export const SESSION_EXPIRY = 30 * 60 * 1000
 export const ROLES = {
     ADMIN: "admin",
     DIRECTOR: "director",
-    USER: "user"
+    CHEF_SERVICE: "chef service"
 }
 
 

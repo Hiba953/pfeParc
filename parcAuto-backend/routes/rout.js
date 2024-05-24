@@ -8,7 +8,8 @@ import { vehiculeModel } from "../bd/vehicule.js";
 import { ExpiriesModel } from "../bd/expiries.js";
 import { gplModel } from "../bd/gpl.js";
 import { RechargeCarburantModel } from "../bd/rechargeCarburant.js";
-
+// import { TotalMontantModel } from "../bd/carbMontant.js";
+import { ChauffeurModel } from "../bd/chauffeur.js";
 export function setUpRoutes(app) {
   app.get("/parcAuto", (req, res) => {
     res.json({
@@ -166,6 +167,107 @@ app.delete("/users/:id", deserializeUser, requireUser, async (req, res) => {
   }
 });
 
+app.post("/chauffeurs", deserializeUser, requireUser, async (req, res) => {
+    try {
+      const { firstName, lastName, fonction } = req.body;
+
+
+      const existe = await userModel.findOne({
+        firstName,
+        lastName,
+      });
+      if (existe) {
+        return res
+          .status(403)
+          .json({ message: `${firstName} ${lastName} already exist` });
+      }
+
+
+      const chauffeur = await ChauffeurModel.create({
+        firstName,
+        lastName,
+        fonction,
+      });
+      res.status(201).json(chauffeur);
+    } catch (e) {
+      console.error(e, "Error creating vehicle:");
+      res.status(500).json({ message: "Server error." });
+    }
+  });
+
+
+  app.get(
+    "/chauffeurs",
+    deserializeUser,
+    requireUser,
+    async (req, res, next) => {
+      const chauffeurs = await ChauffeurModel.find();
+      // .populate("createdBy");
+      res.json({ chauffeurs, message: "all chauffeurs renderd" });
+    }
+  );
+  app.get("/chauffeurs/:id", deserializeUser, requireUser, async (req, res) => {
+    const chauffeur = await ChauffeurModel.findById(req.params.id);
+    res.status(200).json({
+      chauffeur,
+      message: "chauffeur fetched succesfully ",
+    });
+  });
+  app.delete(
+    "/chauffeurs/:id",
+    deserializeUser,
+    requireUser,
+    async (req, res) => {
+      try {
+        const chauffeur = await ChauffeurModel.findOneAndDelete({
+          _id: req.params.id,
+        });
+
+
+        if (!chauffeur) {
+          return res.status(404).json({
+            message: "chauffeur not found.",
+          });
+        }
+
+
+        res.status(200).json({
+          message: "chauffeur deleted successfully.",
+        });
+      } catch (error) {
+        console.error("Error deleting :", error);
+        res.status(500).json({
+          message: "Server error.",
+        });
+      }
+    }
+  );
+  app.put("/chauffeurs/:id", deserializeUser, requireUser, async (req, res) => {
+    const { firstName, lastName, fonction } = req.body;
+
+
+    const chauffeur = await userModel.findById(req.params.id);
+    chauffeur.firstName = firstName;
+    chauffeur.lastName = lastName;
+    chauffeur.fonction = fonction;
+    await chauffeur.save();
+
+
+    res.status(200).json({
+      message: "chauffeur modified",
+      chauffeur,
+    });
+  });
+
+  app.get("/chauffeurs/count", async (req, res) => {
+    try {
+      const chauffeurCount = await ChauffeurModel.countDocuments({});
+      res.status(200).json({ totalChauffeurs: chauffeurCount });
+    } catch (e) {
+      console.log(e, 'Error fetching chauffeur count:');
+      res.status(500).json({ message: 'Failed to fetch chauffeur count' });
+    }
+  });
 
 app.get("/vehicule", deserializeUser,requireUser,async (req,res) => {
   try {
@@ -307,7 +409,24 @@ app.post("/rechargeCarburant", deserializeUser, requireUser, async (req, res) =>
   }
 });
 
+app.get("/totalMontantRecharges", async (req, res) => {
+  try {
+    // Calculate total montant for all recharges
+    const totalMontant = await RechargeCarburantModel.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalMontant: { $sum: "$montant" }
+        }
+      }
+    ]);
 
+    res.status(200).json({ totalMontant });
+  } catch (e) {
+    console.log(e, 'Error calculating total montant of recharges:');
+    res.status(500).json({ message: 'Failed to calculate total montant of recharges' });
+  }
+});
 app.post("/reparationGarage", deserializeUser, requireUser, async (req, res) => {
     try {
       const {vehicule,piece,entryDate,exitDate,panneDeclaree,panneReparee,montant,repairDate,} = req.body;
@@ -359,6 +478,7 @@ app.post("/reparationGarage", deserializeUser, requireUser, async (req, res) => 
   });
 
 
+  
 
 
 // // Create a new vehicle
